@@ -1,4 +1,11 @@
 local bigint = {}
+
+setmetatable(bigint, {
+    __call = function(_, ...)
+        return bigint.new(...)
+    end
+})
+
 local mt = {
     __tostring = function(arg)
         return bigint.tostring(arg)
@@ -49,7 +56,7 @@ function bigint.new(arg)
         local curdgt = dgtlen
     
         -- cut the string into the 10 ^ exponent chunks we want
-        str = string.rep("0", padlen)..str
+        str = string.rep("0", padlen) .. str
         for chunk in str:gmatch("(" .. string.rep("%d", exponent) .. ")") do
             res.digits[curdgt] = tonumber(chunk)
             curdgt = curdgt - 1
@@ -77,7 +84,7 @@ function bigint.tostring(arg)
     end
     local str = arg.negative and "-" or ""
     for i = #arg.digits, 1, -1 do
-        str = str + string.format(
+        str = str .. string.format(
             i ~= #arg.digits and "%07d" or "%d",
             arg.digits[i]
         )
@@ -119,7 +126,7 @@ function bigint.compare_digits(arg1, arg2)
 end
 
 -- arg1 and arg2 must both be positive
-function bigint.add_raw(arg1, arg2)
+local function add_raw(arg1, arg2)
     local res = {}
     local carry = 0
     local max_digits = #arg2.digits
@@ -147,7 +154,7 @@ function bigint.add_raw(arg1, arg2)
 end
 
 -- arg1 must be greater than arg2, both must be positive
-function bigint.subtract_raw(arg1, arg2)
+local function subtract_raw(arg1, arg2)
     local res = {}
     local borrow = 0
     for i = 1, #arg1.digits do
@@ -179,19 +186,19 @@ function bigint.add(arg1, arg2)
     if arg1.negative == arg2.negative then
         return setmetatable({
             negative = arg1.negative,
-            digits = bigint.add_raw(arg1, arg2)
+            digits = add_raw(arg1, arg2)
         }, mt)
     elseif bigint.compare_magnitude(arg1, arg2) == 0 then
         return bigint.new(0)
     elseif bigint.compare_magnitude(arg1, arg2) > 0 then
         return setmetatable({
             negative = arg1.negative,
-            digits = bigint.subtract_raw(arg1, arg2)
+            digits = subtract_raw(arg1, arg2)
         }, mt)
     else
         return setmetatable({
             negative = arg2.negative,
-            digits = bigint.subtract_raw(arg2, arg1)
+            digits = subtract_raw(arg2, arg1)
         }, mt)
     end
 end
