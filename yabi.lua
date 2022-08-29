@@ -40,24 +40,24 @@ function bigint.new(arg)
             arg = math.floor(arg / base)
         end
     elseif type(arg) == "string" then
-        if not str:match("^%-?%d+$") then
-            error(string.format([[Cannot parse string "%s" to bigint]], str), 2)
+        if not arg:match("^%-?%d+$") then
+            error(string.format([[Cannot parse string "%s" to bigint]], arg), 2)
         end
 
         -- negative sign
-        if str:sub(1, 1) == "-" then
-            str = str:sub(2, -1)
+        if arg:sub(1, 1) == "-" then
+            arg = arg:sub(2, -1)
             res.negative = true
         end
 
-        local strlen = #str
+        local strlen = #arg
         local padlen = exponent - (strlen % exponent)
         local dgtlen = math.floor(0.5 + (strlen + padlen) / exponent) -- in case of funny floating points
         local curdgt = dgtlen
     
         -- cut the string into the 10 ^ exponent chunks we want
-        str = string.rep("0", padlen) .. str
-        for chunk in str:gmatch("(" .. string.rep("%d", exponent) .. ")") do
+        arg = string.rep("0", padlen) .. arg
+        for chunk in arg:gmatch("(" .. string.rep("%d", exponent) .. ")") do
             res.digits[curdgt] = tonumber(chunk)
             curdgt = curdgt - 1
         end
