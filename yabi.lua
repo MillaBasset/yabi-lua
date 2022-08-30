@@ -178,6 +178,12 @@ local function subtract_raw(arg1, arg2)
         end
         table.insert(res, digit_res)
     end
+    -- removes leading zeroes
+    -- I don't think any digit but the leading digit can be zero?
+    -- but I'll have this here for now
+    while res[#res] == 0 do
+        res[#res] = nil
+    end
     return res
 end
 
