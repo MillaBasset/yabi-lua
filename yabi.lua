@@ -232,18 +232,17 @@ local function multiply_raw(arg1, arg2)
             if not res[pos] then
                 res[pos] = 0
             end
-            res[pos] = res[pos] + arg1.digits[i] * arg2.digits[j]
-        end
-    end
-    for i = 1, #res do
-        local to_add = math.floor(res[i] / base)
-        res[i] = res[i] % base
-        if i == #res then
-            if to_add ~= 0 then
-                res[i + 1] = to_add
+            local digit_res = arg1.digits[i] * arg2.digits[j]
+            res[pos] = res[pos] + digit_res
+            if res[pos] >= base then
+                local to_add = math.floor(res[pos] / base)
+                res[pos] = res[pos] % base
+                if res[pos + 1] then
+                    res[pos + 1] = res[pos + 1] + to_add
+                else
+                    res[pos + 1] = to_add
+                end
             end
-        else
-            res[i + 1] = res[i + 1] + to_add
         end
     end
 
