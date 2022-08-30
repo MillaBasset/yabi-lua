@@ -16,6 +16,9 @@ local mt = {
     __mul = function(arg1, arg2)
         return bigint.multiply(arg1, arg2)
     end,
+    __div = function(arg1, arg2)
+        return bigint.divide(arg1, arg2)
+    end,
     __eq = function(arg1, arg2)
         return bigint.compare(arg1, arg2) == 0
     end,
@@ -41,6 +44,8 @@ function bigint.new(arg)
     if getmetatable(arg) == mt then
         res.negative = arg.negative
         res.digits = {unpack(arg.digits)}
+    elseif type(arg) == "nil" then
+        -- do nothing; res is already initialized
     elseif type(arg) == "number" then
         if arg ~= arg or math.abs(arg) == math.huge then
             error("non-finite number supplied to bigint.new", 2)
@@ -60,7 +65,7 @@ function bigint.new(arg)
         end
     elseif type(arg) == "string" then
         if not arg:match("^%-?%d+$") then
-            error(string.format([[Cannot parse string "%s" to bigint]], arg), 2)
+            error(string.format([[cannot parse string "%s" to bigint]], arg), 2)
         end
 
         -- negative sign
@@ -92,7 +97,7 @@ function bigint.new(arg)
             res.negative = false
         end
     else
-        error("bigint.new expects a number, string, or bigint", 2)
+        error("bigint.new expects a nil, number, string, or bigint", 2)
     end
     return setmetatable(res, mt)
 end
