@@ -102,6 +102,14 @@ function bigint.tostring(arg)
     return str
 end
 
+function bigint.tonumber(arg)
+    local res = 0
+    for i = 1, #arg.digits do
+        res = res + arg.digits[i] * base ^ (i - 1)
+    end
+    return arg.negative and -res or res
+end
+
 function bigint.compare(arg1, arg2)
     if arg2.negative and not arg1.negative then
         return 1
