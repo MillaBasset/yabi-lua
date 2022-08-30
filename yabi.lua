@@ -16,6 +16,15 @@ local mt = {
     __mul = function(arg1, arg2)
         return bigint.multiply(arg1, arg2)
     end,
+    __eq = function(arg1, arg2)
+        return bigint.compare(arg1, arg2) == 0
+    end,
+    __lt = function(arg1, arg2)
+        return bigint.compare(arg1, arg2) < 0
+    end,
+    __le = function(arg1, arg2)
+        return bigint.compare(arg1, arg2) <= 0
+    end,
     __tostring = function(arg)
         return bigint.tostring(arg)
     end,
