@@ -267,10 +267,70 @@ local function multiply_raw(arg1, arg2)
 end
 
 function bigint.multiply(arg1, arg2)
-    return setmetatable({
-        negative = arg1.negative ~= arg2.negative,
-        digits = multiply_raw(arg1, arg2)
-    }, mt)
+    if (
+        bigint.compare(arg1, bigint.new(0)) == 0 or
+        bigint.compare(arg2, bigint.new(0)) == 0
+    ) then
+        return bigint.new(0)
+    -- next two conditions handle 1 and -1
+    elseif bigint.compare_magnitude(arg1, bigint.new(1)) == 0 then
+        return setmetatable({
+            negative = arg1.negative ~= arg2.negative,
+            digits = {unpack(arg2.digits)}
+        }, mt)
+    elseif bigint.compare_magnitude(arg2, bigint.new(1)) == 0 then
+        return setmetatable({
+            negative = arg1.negative ~= arg2.negative,
+            digits = {unpack(arg1.digits)}
+        }, mt)
+    else
+        return setmetatable({
+            negative = arg1.negative ~= arg2.negative,
+            digits = multiply_raw(arg1, arg2)
+        }, mt)
+    end
+end
+
+-- arg1 must be greater than or equal to arg2, both must be positive
+local function divide_raw(arg1, arg2)
+    local res, dividend = {}, bigint.new(0)
+
+    for i = #arg1.digits, 1, -1 do
+        table.insert(dividend.digits, 1, arg1.digits[i])
+
+        local factor = bigint.new(0)
+        while bigint.compare_magnitude(dividend, arg2) >= 0 do
+            dividend = bigint.subtract(dividend, arg2)
+            factor = bigint.add(factor, bigint.new(1))
+        end
+
+        for i = #factor.digits, 1, -1 do
+            table.insert(res, 1, factor.digits[i])
+        end
+    end
+
+    return res
+end
+
+function bigint.divide(arg1, arg2)
+    if bigint.compare(arg2, bigint.new(0)) == 0 then
+        error("bigint.divide: attempted to divide by zero", 2)
+    elseif bigint.compare_magnitude(arg1, arg2) < 0 then
+        return bigint.new(0)
+    elseif bigint.compare_magnitude(arg1, arg2) == 0 then
+        return bigint.new(arg1.negative == arg2.negative and 1 or -1)
+    -- handles divisor of 1 or -1
+    elseif bigint.compare_magnitude(arg2, bigint.new(1)) == 0 then
+        return setmetatable({
+            negative = arg1.negative ~= arg2.negative,
+            digits = {unpack(arg1.digits)}
+        }, mt)
+    else
+        return setmetatable({
+            negative = arg1.negative ~= arg2.negative,
+            digits = divide_raw(arg1, arg2)
+        }, mt)
+    end
 end
 
 return bigint
