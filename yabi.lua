@@ -7,9 +7,16 @@ setmetatable(bigint, {
 })
 
 local mt = {
+    __add = function(arg1, arg2)
+        return bigint.add(arg1, arg2)
+    end,
+    __sub = function(arg1, arg2)
+        return bigint.subtract(arg1, arg2)
+    end,
     __tostring = function(arg)
         return bigint.tostring(arg)
-    end
+    end,
+    __index = bigint
 }
 
 local exponent = 7
