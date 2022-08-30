@@ -13,6 +13,9 @@ local mt = {
     __sub = function(arg1, arg2)
         return bigint.subtract(arg1, arg2)
     end,
+    __mul = function(arg1, arg2)
+        return bigint.multiply(arg1, arg2)
+    end,
     __tostring = function(arg)
         return bigint.tostring(arg)
     end,
@@ -218,6 +221,40 @@ end
 
 function bigint.subtract(arg1, arg2)
     return bigint.add(arg1, bigint.negate(arg2))
+end
+
+-- arg1 and arg2 must both be positive
+local function multiply_raw(arg1, arg2)
+    local res = {}
+    for i = 1, #arg1.digits do
+        for j = 1, #arg2.digits do
+            local pos = i + j - 1
+            if not res[pos] then
+                res[pos] = 0
+            end
+            res[pos] = res[pos] + arg1.digits[i] * arg2.digits[j]
+        end
+    end
+    for i = 1, #res do
+        local to_add = math.floor(res[i] / base)
+        res[i] = res[i] % base
+        if i == #res then
+            if to_add ~= 0 then
+                res[i + 1] = to_add
+            end
+        else
+            res[i + 1] = res[i + 1] + to_add
+        end
+    end
+
+    return res
+end
+
+function bigint.multiply(arg1, arg2)
+    return setmetatable({
+        negative = arg1.negative ~= arg2.negative,
+        digits = multiply_raw(arg1, arg2)
+    }, mt)
 end
 
 return bigint
