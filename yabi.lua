@@ -109,7 +109,7 @@ function bigint.tostring(arg)
     local str = arg.negative and "-" or ""
     for i = #arg.digits, 1, -1 do
         str = str .. string.format(
-            i ~= #arg.digits and "%07d" or "%d",
+            i ~= #arg.digits and ("%0" .. exponent .. "d") or "%d",
             arg.digits[i]
         )
     end
@@ -298,23 +298,9 @@ end
 
 -- arg1 must be greater than or equal to arg2, both must be positive
 local function divide_raw(arg1, arg2)
-    local res, dividend = {}, bigint.new(0)
-
-    for i = #arg1.digits, 1, -1 do
-        table.insert(dividend.digits, 1, arg1.digits[i])
-
-        local factor = bigint.new(0)
-        while bigint.compare_magnitude(dividend, arg2) >= 0 do
-            dividend = bigint.subtract(dividend, arg2)
-            factor = bigint.add(factor, bigint.new(1))
-        end
-
-        for i = #factor.digits, 1, -1 do
-            table.insert(res, 1, factor.digits[i])
-        end
-    end
-
-    return res
+    -- when implemented, method is supposed to return an array of digits
+    -- (not a bigint object) with the least significant digit coming first
+    error("division currently unimplemented", 3)
 end
 
 function bigint.divide(arg1, arg2)
