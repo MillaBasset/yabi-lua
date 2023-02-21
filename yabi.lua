@@ -19,6 +19,9 @@ local mt = {
     __div = function(arg1, arg2)
         return bigint.divide(arg1, arg2)
     end,
+    __unm = function(arg)
+        return bigint.negate(arg)
+    end,
     __eq = function(arg1, arg2)
         return bigint.compare(arg1, arg2) == 0
     end,
@@ -219,6 +222,13 @@ function bigint.negate(arg)
     }, mt)
 end
 
+function bigint.abs(arg)
+    return setmetatable({
+        negative = false,
+        digits = {unpack(arg.digits)}
+    }, mt)
+end
+
 function bigint.add(arg1, arg2)
     local res = {}
     if arg1.negative == arg2.negative then
@@ -298,9 +308,30 @@ end
 
 -- arg1 must be greater than or equal to arg2, both must be positive
 local function divide_raw(arg1, arg2)
+    --[[
     -- when implemented, method is supposed to return an array of digits
     -- (not a bigint object) with the least significant digit coming first
     error("division currently unimplemented", 3)
+    ]]
+    local res, dividend = {}, bigint.new(0)
+
+    for i = #arg1.digits, 1, -1 do
+        if arg1.digits[i] ~= 0 then
+            table.insert(dividend.digits, 1, arg1.digits[i])
+        end
+        local cur_digit = 0
+
+        while bigint.compare_magnitude(dividend, arg2) >= 0 do
+            cur_digit = cur_digit + 1
+            dividend = bigint.subtract(dividend, arg2)
+        end
+
+        if not (cur_digit == 0 and #res == 0) then
+            table.insert(res, 1, cur_digit)
+        end
+    end
+
+    return res
 end
 
 function bigint.divide(arg1, arg2)
