@@ -311,7 +311,7 @@ local function divide_raw(arg1, arg2)
     local res, dividend = {}, bigint.new(0)
 
     for i = #arg1.digits, 1, -1 do
-        if arg1.digits[i] ~= 0 then
+        if not (arg1.digits[i] == 0 and #dividend.digits == 0) then
             table.insert(dividend.digits, 1, arg1.digits[i])
         end
         local cur_digit = 0
