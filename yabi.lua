@@ -308,11 +308,6 @@ end
 
 -- arg1 must be greater than or equal to arg2, both must be positive
 local function divide_raw(arg1, arg2)
-    --[[
-    -- when implemented, method is supposed to return an array of digits
-    -- (not a bigint object) with the least significant digit coming first
-    error("division currently unimplemented", 3)
-    ]]
     local res, dividend = {}, bigint.new(0)
 
     for i = #arg1.digits, 1, -1 do
@@ -323,7 +318,7 @@ local function divide_raw(arg1, arg2)
 
         while bigint.compare_magnitude(dividend, arg2) >= 0 do
             cur_digit = cur_digit + 1
-            dividend = bigint.subtract(dividend, arg2)
+            dividend = bigint.subtract(dividend, bigint.abs(arg2))
         end
 
         if not (cur_digit == 0 and #res == 0) then
